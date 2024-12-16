@@ -1,4 +1,4 @@
-const cacheName = 'pixel-art-generator-v1';
+const cacheName = 'pixel-art-generator-v2';
 const assetsToCache = [
     '/',
     '/index.html',
