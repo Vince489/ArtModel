@@ -7,9 +7,10 @@ document.getElementById('uploadImage').addEventListener('change', loadImage);
 
 function loadImage(event) {
     const file = event.target.files[0];
-    const reader = new FileReader();
+    if (!file) return;
 
-    reader.onload = function (e) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
         img.src = e.target.result;
     };
     reader.readAsDataURL(file);
@@ -25,11 +26,9 @@ function generatePixelArt() {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    // Show loading indicator
     const loading = document.getElementById('loading');
     loading.style.display = 'block';
 
-    // Scale image to fit the maximum canvas size
     setTimeout(() => {
         let width = img.width;
         let height = img.height;
@@ -45,12 +44,12 @@ function generatePixelArt() {
 
         ctx.drawImage(img, 0, 0, width, height);
 
-        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, width, height);
         const data = imageData.data;
 
-        for (let y = 0; y < canvas.height; y += pixelSize) {
-            for (let x = 0; x < canvas.width; x += pixelSize) {
-                const index = (y * canvas.width + x) * 4;
+        for (let y = 0; y < height; y += pixelSize) {
+            for (let x = 0; x < width; x += pixelSize) {
+                const index = (y * width + x) * 4;
                 const r = data[index];
                 const g = data[index + 1];
                 const b = data[index + 2];
@@ -60,7 +59,6 @@ function generatePixelArt() {
             }
         }
 
-        // Hide loading indicator and set download link
         loading.style.display = 'none';
         document.getElementById('downloadLink').href = canvas.toDataURL();
     }, 100);
