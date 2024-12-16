@@ -5,6 +5,7 @@ body {
     background: linear-gradient(to bottom, #f3f4f6, #d1d5db);
     color: #333;
     text-align: center;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
 }
 
 h1 {
@@ -59,25 +60,34 @@ button:active {
     transform: translateY(0);
 }
 
-/* Canvas Styling */
-/* canvas {
-    display: block;
-    margin: 2rem auto;
-    border: 2px solid #444;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    background-color: #fff;
-} */
-
-canvas {
-    display: block;
-    margin: 2rem auto;
-    border: 2px solid #444;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    background-color: #fff;
-    max-width: 100%; /* Restrict to the container's width */
-    height: auto;    /* Maintain aspect ratio */
+/* Canvas Container */
+.canvas-container {
+    width: 100%;
+    max-width: 800px; /* Set a reasonable maximum size */
+    margin: 0 auto;   /* Center the container horizontally */
+    overflow: hidden; /* Prevent any content overflow */
+    box-sizing: border-box; /* Include padding and border in width calculations */
+    padding: 0 10px;  /* Add slight padding for responsiveness */
 }
 
+/* Canvas Styling */
+canvas {
+    display: block; /* Remove inline spacing */
+    width: 100%;    /* Make canvas responsive */
+    height: auto;   /* Maintain aspect ratio */
+    margin: 0 auto; /* Center the canvas */
+    border: 2px solid #444;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    background-color: #fff;
+    box-sizing: border-box; /* Fix box model */
+}
+
+/* Loading Indicator */
+#loading {
+    font-size: 1.2rem;
+    color: #007BFF;
+    margin: 1rem 0;
+}
 
 /* Download Link */
 #downloadLink {

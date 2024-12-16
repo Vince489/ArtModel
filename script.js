@@ -1,41 +1,20 @@
-// Add event listeners to buttons and file input
+const MAX_WIDTH = 800; // Maximum canvas width
+const MAX_HEIGHT = 600; // Maximum canvas height
+
+const img = new Image();
 document.getElementById('generateButton').addEventListener('click', generatePixelArt);
 document.getElementById('uploadImage').addEventListener('change', loadImage);
 
-// Register service worker for caching and offline capabilities
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('Service Worker Registered'))
-        .catch(err => console.error('Service Worker Registration Failed:', err));
-}
-
-// Global variable to store the uploaded image
-let img = new Image();
-
-/**
- * Load the selected image file and set it to the global img object.
- */
 function loadImage(event) {
     const file = event.target.files[0];
-
-    if (!file) {
-        alert('Please select an image file!');
-        return;
-    }
-
     const reader = new FileReader();
-    reader.onload = function(e) {
+
+    reader.onload = function (e) {
         img.src = e.target.result;
-        img.onload = () => {
-            console.log('Image successfully loaded!');
-        };
     };
     reader.readAsDataURL(file);
 }
 
-/**
- * Generate pixel art from the uploaded image based on the selected pixel size.
- */
 function generatePixelArt() {
     if (!img.src) {
         alert('Please upload an image first!');
@@ -46,31 +25,43 @@ function generatePixelArt() {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-    // Resize the canvas to match the image dimensions
-    canvas.width = img.width;
-    canvas.height = img.height;
+    // Show loading indicator
+    const loading = document.getElementById('loading');
+    loading.style.display = 'block';
 
-    // Draw the uploaded image onto the canvas
-    ctx.drawImage(img, 0, 0);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const data = imageData.data;
+    // Scale image to fit the maximum canvas size
+    setTimeout(() => {
+        let width = img.width;
+        let height = img.height;
 
-    // Loop through the image pixels and apply the pixelation effect
-    for (let y = 0; y < canvas.height; y += pixelSize) {
-        for (let x = 0; x < canvas.width; x += pixelSize) {
-            const index = (y * canvas.width + x) * 4;
-            const r = data[index];
-            const g = data[index + 1];
-            const b = data[index + 2];
-
-            ctx.fillStyle = `rgb(${r},${g},${b})`;
-            ctx.fillRect(x, y, pixelSize, pixelSize);
+        if (width > MAX_WIDTH || height > MAX_HEIGHT) {
+            const scale = Math.min(MAX_WIDTH / width, MAX_HEIGHT / height);
+            width = Math.floor(width * scale);
+            height = Math.floor(height * scale);
         }
-    }
 
-    // Update the download link with the new pixelated image
-    const downloadLink = document.getElementById('downloadLink');
-    downloadLink.href = canvas.toDataURL();
-    downloadLink.style.display = 'inline-block'; // Make sure the link is visible
-    console.log('Pixel art generated successfully!');
+        canvas.width = width;
+        canvas.height = height;
+
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        for (let y = 0; y < canvas.height; y += pixelSize) {
+            for (let x = 0; x < canvas.width; x += pixelSize) {
+                const index = (y * canvas.width + x) * 4;
+                const r = data[index];
+                const g = data[index + 1];
+                const b = data[index + 2];
+
+                ctx.fillStyle = `rgb(${r},${g},${b})`;
+                ctx.fillRect(x, y, pixelSize, pixelSize);
+            }
+        }
+
+        // Hide loading indicator and set download link
+        loading.style.display = 'none';
+        document.getElementById('downloadLink').href = canvas.toDataURL();
+    }, 100);
 }
