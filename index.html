@@ -4,28 +4,270 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pixel Art Generator</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        /* General Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #1E1E2E;
+            color: #E0E0E0;
+            text-align: center;
+        }
+
+        h1 {
+            margin: 1rem 0;
+            color: #FFFFFF;
+        }
+
+        /* Upload Container */
+        .upload-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 400px;
+            margin: 1rem auto;
+            border: 2px dashed #555;
+            border-radius: 10px;
+            background-color: #2D2F36;
+            overflow: hidden;
+        }
+
+        .upload-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            color: #E0E0E0;
+            transition: background-color 0.3s ease;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .upload-box:hover {
+            background-color: #2F3037;
+        }
+
+        .upload-content {
+            text-align: center;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #FFFFFF;
+            margin-bottom: 0.5rem;
+        }
+
+        #uploadedImage {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: none;
+        }
+
+        .clear-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #DC3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+            z-index: 10;
+        }
+
+        /* Canvas Styling */
+        canvas {
+            display: none;
+            max-width: 100%;
+            margin: 1rem auto;
+            border: 2px solid #555;
+            background-color: #1E1E2E;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Buttons */
+        button, a {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
+            text-decoration: none;
+            margin-top: 1rem;
+            display: inline-block;
+        }
+
+        button:hover, a:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+
+        /* Pixel Size Container */
+        .pixel-size-container {
+            margin: 1rem auto;
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .pixel-size-label {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #E0E0E0;
+        }
+
+        .pixel-size-select {
+            background-color: #2D2F36;
+            color: #E0E0E0;
+            border: 1px solid #555;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .pixel-size-select:hover {
+            border-color: #00C853;
+        }
+    </style>
 </head>
 <body>
     <h1>Pixel Art Generator</h1>
-    <input type="file" id="uploadImage" accept="image/*">
-    <div>
-        <label for="pixelSize">Pixel Size:</label>
-        <select id="pixelSize">
+
+    <!-- Upload Container -->
+    <div class="upload-container">
+        <input type="file" id="uploadImage" accept="image/*" style="display: none;">
+        <label for="uploadImage" class="upload-box" id="uploadBox">
+            <div class="upload-content">
+                <span class="upload-icon">&#x21E7;</span>
+                <p>Upload Input Image</p>
+            </div>
+        </label>
+        <img id="uploadedImage" alt="Uploaded Image">
+        <button id="clearButton" class="clear-button">Clear</button>
+    </div>
+
+    <!-- Pixel Size Dropdown -->
+    <div class="pixel-size-container">
+        <label for="pixelSize" class="pixel-size-label">Pixel Size:</label>
+        <select id="pixelSize" class="pixel-size-select">
             <option value="1">1x1</option>
             <option value="2">2x2</option>
+            <option value="3">3x3</option>
             <option value="4">4x4</option>
+            <option value="5">5x5</option>
+            <option value="6">6x6</option>
+            <option value="7">7x7</option>
             <option value="8">8x8</option>
+            <option value="9">9x9</option>
+            <option value="10">10x10</option>
+            <option value="12">12x12</option>
             <option value="16">16x16</option>
+            <option value="20">20x20</option>
             <option value="24">24x24</option>
         </select>
-        <button id="generateButton">Generate Pixel Art</button>
     </div>
-    <div id="loading" style="display: none;">Generating Pixel Art...</div>
-    <div class="canvas-container">
-        <canvas id="canvas"></canvas>
-    </div>
-    <a id="downloadLink" download="pixel-art.png">Download</a>
-    <script src="script.js"></script>
+
+
+    <!-- Generate Button -->
+    <button id="generateButton">Generate Pixel Art</button>
+
+    <!-- Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- Download Link -->
+    <a id="downloadLink" download="pixel-art.png" style="display: none;">Download</a>
+
+    <script>
+        const MAX_WIDTH = 800;
+        const MAX_HEIGHT = 600;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const img = new Image();
+            const uploadImageInput = document.getElementById('uploadImage');
+            const uploadBox = document.getElementById('uploadBox');
+            const uploadedImage = document.getElementById('uploadedImage');
+            const clearButton = document.getElementById('clearButton');
+            const generateButton = document.getElementById('generateButton');
+            const pixelSizeSelect = document.getElementById('pixelSize');
+            const downloadLink = document.getElementById('downloadLink');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            uploadImageInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    img.src = e.target.result;
+                    uploadedImage.src = e.target.result;
+                    uploadedImage.style.display = 'block';
+                    uploadBox.style.display = 'none';
+                    clearButton.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            });
+
+            generateButton.addEventListener('click', () => {
+                const pixelSize = parseInt(pixelSizeSelect.value);
+                const aspectRatio = img.width / img.height;
+                let newWidth = MAX_WIDTH;
+                let newHeight = Math.floor(MAX_WIDTH / aspectRatio);
+
+                canvas.width = newWidth;
+                canvas.height = newHeight;
+
+                ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+                const imageData = ctx.getImageData(0, 0, newWidth, newHeight);
+                const data = imageData.data;
+
+                for (let y = 0; y < newHeight; y += pixelSize) {
+                    for (let x = 0; x < newWidth; x += pixelSize) {
+                        const index = (y * newWidth + x) * 4;
+                        const r = data[index];
+                        const g = data[index + 1];
+                        const b = data[index + 2];
+                        ctx.fillStyle = `rgb(${r},${g},${b})`;
+                        ctx.fillRect(x, y, pixelSize, pixelSize);
+                    }
+                }
+
+                canvas.style.display = 'block';
+                downloadLink.href = canvas.toDataURL('image/png');
+                downloadLink.style.display = 'block';
+            });
+
+            clearButton.addEventListener('click', () => {
+                uploadBox.style.display = 'flex';
+                uploadedImage.style.display = 'none';
+                clearButton.style.display = 'none';
+                canvas.style.display = 'none';
+                downloadLink.style.display = 'none';
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                uploadImageInput.value = '';
+            });
+        });
+    </script>
 </body>
 </html>
