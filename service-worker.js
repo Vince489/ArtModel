@@ -1,11 +1,19 @@
 const cacheName = 'pixel-art-generator-v20';
 const assetsToCache = [
-    'ArtModel/',             // Root folder
-    'ArtModel/index.html',   // Main file
-    'ArtModel/style.css',    // CSS file
-    'ArtModel/script.js',    // JS file
-    'ArtModel/service-worker.js' // SW itself (optional to cache)
+    '/',             // Root folder
+    '/index.html',   // Main file
+    '/style.css',    // CSS file
+    '/script.js',    // JS file
+    '/service-worker.js' // SW itself (optional to cache)
 ];
+
+// const assetsToCache = [
+//     'ArtModel/',             // Root folder
+//     'ArtModel/index.html',   // Main file
+//     'ArtModel/style.css',    // CSS file
+//     'ArtModel/script.js',    // JS file
+//     'ArtModel/service-worker.js' // SW itself (optional to cache)
+// ];
 
 // Install Event
 self.addEventListener('install', (event) => {
