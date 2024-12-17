@@ -211,7 +211,7 @@
             const pixelSizeSelect = document.getElementById('pixelSize');
             const downloadLink = document.getElementById('downloadLink');
             const canvas = document.getElementById('canvas');
-            const ctx = canvas.getContext('2d');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
             uploadImageInput.addEventListener('change', (event) => {
                 const file = event.target.files[0];
